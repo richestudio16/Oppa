@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเก็บเครดิตร้านค้า - Store Credits</title>
+    <!-- Tailwind CSS สำหรับการแต่งสไตล์ที่คลีนและน่ารัก -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background-color: #faf8f5; }
+        .pink-gradient { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); }
+    </style>
+</head>
+<body class="text-gray-700 min-h-screen flex flex-col justify-between">
+
+    <!-- Navbar / Header Bar -->
+    <nav class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">🛍️</span>
+            <span class="font-bold text-lg text-gray-800" id="shop-title-nav">My Cute Store</span>
+        </div>
+        <div>
+            <!-- ปุ่มสลับโหมด Guest / Admin -->
+            <button id="admin-toggle-btn" onclick="toggleAdminModal()" class="text-xs bg-pink-100 hover:bg-pink-200 text-pink-600 font-medium px-4 py-2 rounded-full transition">
+                🔒 เข้าสู่ระบบ Admin
+            </button>
+        </div>
+    </nav>
+
+    <!-- Header Banner (ปรับสีได้) -->
+    <header id="header-bg" class="pink-gradient text-center py-12 px-4 shadow-inner transition-colors duration-300">
+        <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-2">✨ เครดิต & รีวิวการซื้อขาย ✨</h1>
+        <p class="text-gray-600 text-sm md:text-base">ขอบพระคุณลูกค้าทุกท่านที่ไว้วางใจอุดหนุนร้านเรานะคะ 💕</p>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto p-6 w-full flex-grow">
+
+        <!-- ================= PANEL ADMIN (จะแสดงเฉพาะตอนล็อกอินเป็น Admin) ================= -->
+        <div id="admin-panel" class="hidden mb-10 bg-white p-6 rounded-3xl shadow-lg border-2 border-pink-200">
+            <div class="flex justify-between items-center mb-6 pb-3 border-b">
+                <h2 class="text-xl font-bold text-pink-500 flex items-center gap-2">
+                    🎀 จัดการหลังบ้าน (Admin Dashboard)
+                </h2>
+                <button onclick="logoutAdmin()" class="text-xs text-red-400 hover:text-red-600 underline">ออกจากระบบ</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- ฟอร์มเพิ่มเครดิต -->
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-3">➕ เพิ่มเครดิตใหม่</h3>
+                    <form id="add-credit-form" onsubmit="handleAddCredit(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">ชื่อลูกค้า</label>
+                            <input type="text" id="cust-name" required placeholder="เช่น คุณ มินตรา" class="w-full p-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-pink-300 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">ข้อความรีวิว/รายละเอียด</label>
+                            <textarea id="cust-review" required placeholder="ส่งของไว สินค้าน่ารักมากค่ะ..." class="w-full p-2.5 text-sm border rounded-xl focus:ring-2 focus:ring-pink-300 outline-none h-20"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">ให้คะแนน (ดาว)</label>
+                                <select id="cust-rating" class="w-full p-2.5 text-sm border rounded-xl outline-none">
+                                    <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐ (5/5)</option>
+                                    <option value="⭐⭐⭐⭐">⭐⭐⭐⭐ (4/5)</option>
+                                    <option value="⭐⭐⭐">⭐⭐⭐ (3/5)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">รูปหลักฐาน/สลิป</label>
+                                <input type="file" id="cust-img" accept="image/*" class="w-full text-xs text-gray-500 p-1.5 border rounded-xl">
+                            </div>
+                        </div>
+                        <button type="submit" id="submit-btn" class="w-full bg-pink-400 hover:bg-pink-500 text-white font-medium py-2.5 rounded-xl transition text-sm shadow-sm mt-2">
+                            บันทึกเครดิต
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ปรับแต่งธีมและสี -->
+                <div class="bg-pink-50/50 p-5 rounded-2xl border border-pink-100 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3">🎨 ปรับแต่งสไตล์หน้าเว็บ</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">เลือกสี Banner หัวเว็บ</label>
+                                <input type="color" id="theme-color" value="#fbcfe8" onchange="changeThemeColor(this.value)" class="w-full h-10 border-0 rounded-xl cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-4">
+                        * การปรับแต่งจะถูกบันทึกไว้ในระบบความจำของเบราว์เซอร์อัตโนมัติ
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GUEST VIEW (ส่วนแสดงผลหลัก) ================= -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-semibold text-gray-700">รีวิวทั้งหมด (<span id="credit-count">0</span>)</h2>
+        </div>
+
+        <!-- Grid แสดงการ์ดเครดิต -->
+        <div id="credit-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- ข้อมูลเครดิตจะถูก Render ด้วย JavaScript ตรงนี้ -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-gray-400 border-t bg-white mt-10">
+        © 2026 Store Credit System — Style Cute & Clean
+    </footer>
+
+    <!-- Modal เข้าสู่ระบบ Admin -->
+    <div id="login-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 rounded-3xl max-w-sm w-full shadow-2xl text-center">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">🔑 เข้าสู่ระบบหลังบ้าน</h3>
+            <p class="text-xs text-gray-400 mb-4">(ใส่รหัสทดสอบ: <b>1234</b>)</p>
+            <input type="password" id="admin-pass" placeholder="กรอกรหัสผ่าน" class="w-full p-3 border rounded-xl mb-4 text-center text-sm outline-none focus:ring-2 focus:ring-pink-300">
+            <div class="flex gap-2">
+                <button onclick="toggleAdminModal()" class="w-1/2 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl">ยกเลิก</button>
+                <button onclick="loginAdmin()" class="w-1/2 py-2 text-sm bg-pink-400 hover:bg-pink-500 text-white font-medium rounded-xl">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript สำหรับระบบการทำงานทั้งหมด -->
+    <script>
+        // ข้อมูลตัวอย่างเริ่มต้น
+        const defaultCredits = [
+            {
+                id: 1,
+                name: "คุณ K. Somchai",
+                review: "ส่งของไวมากๆ แพ็คมาอย่างดีมีของแถมให้ด้วย น่ารักมากค่ะ!",
+                rating: "⭐⭐⭐⭐⭐",
+                img: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500&q=80",
+                date: "28 ก.ย. 2026"
+            }
+        ];
+
+        let credits = JSON.parse(localStorage.getItem('my_store_credits')) || defaultCredits;
+        let isAdmin = false;
+
+        // โหลดข้อมูลเมื่อเปิดหน้าเว็บ
+        window.onload = function() {
+            renderCredits();
+            loadSavedTheme();
+        };
+
+        // แสดงผลรายการเครดิต
+        function renderCredits() {
+            const container = document.getElementById('credit-container');
+            document.getElementById('credit-count').innerText = credits.length;
+            container.innerHTML = '';
+
+            if (credits.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">ยังไม่มีข้อมูลเครดิต</div>`;
+                return;
+            }
+
+            credits.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl shadow-sm border border-pink-100 flex flex-col justify-between transition hover:shadow-md relative group";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="h-48 bg-pink-50 rounded-xl overflow-hidden mb-3">
+                            <img src="${item.img}" alt="หลักฐาน" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs text-pink-500 font-medium bg-pink-50 px-2.5 py-0.5 rounded-full">ส่งแล้ว</span>
+                            <span class="text-xs">${item.rating}</span>
+                        </div>
+                        <h4 class="font-semibold text-gray-800 text-base">${item.name}</h4>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-3">${item.review}</p>
+                    </div>
+                    <div class="mt-4 pt-2 border-t flex justify-between items-center text-[10px] text-gray-400">
+                        <span>${item.date}</span>
+                        ${isAdmin ? `<button onclick="deleteCredit(${index})" class="text-red-400 hover:text-red-600 font-medium">ลบรายการ</button>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // เพิ่มเครดิตใหม่ (Admin Only)
+        function handleAddCredit(e) {
+            e.preventDefault();
+            const name = document.getElementById('cust-name').value;
+            const review = document.getElementById('cust-review').value;
+            const rating = document.getElementById('cust-rating').value;
+            const imgInput = document.getElementById('cust-img');
+
+            const saveAndRender = (imgUrl) => {
+                const newCredit = {
+                    id: Date.now(),
+                    name: name,
+                    review: review,
+                    rating: rating,
+                    img: imgUrl || 'https://via.placeholder.com/400x300/fce7f3/db2777?text=No+Image',
+                    date: new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })
+                };
+                credits.unshift(newCredit);
+                localStorage.setItem('my_store_credits', JSON.stringify(credits));
+                renderCredits();
+                document.getElementById('add-credit-form').reset();
+                alert('เพิ่มเครดิตเรียบร้อยแล้ว ✨');
+            };
+
+            // จัดการอ่านไฟล์รูปภาพที่อัปโหลด
+            if (imgInput.files && imgInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    saveAndRender(e.target.result);
+                };
+                reader.readAsDataURL(imgInput.files[0]);
+            } else {
+                saveAndRender(null);
+            }
+        }
+
+        // ลบเครดิต
+        function deleteCredit(index) {
+            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
+                credits.splice(index, 1);
+                localStorage.setItem('my_store_credits', JSON.stringify(credits));
+                renderCredits();
+            }
+        }
+
+        // ระบบเปลี่ยนสีธีม
+        function changeThemeColor(color) {
+            document.getElementById('header-bg').style.background = color;
+            localStorage.setItem('my_store_theme', color);
+        }
+
+        function loadSavedTheme() {
+            const savedColor = localStorage.getItem('my_store_theme');
+            if (savedColor) {
+                document.getElementById('header-bg').style.background = savedColor;
+                document.getElementById('theme-color').value = savedColor;
+            }
+        }
+
+        // การเข้าสู่ระบบ Admin
+        function toggleAdminModal() {
+            const modal = document.getElementById('login-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === '1234') { // รหัสผ่าน Admin
+                isAdmin = true;
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('admin-toggle-btn').innerText = '🔓 สิทธิ์ Admin';
+                toggleAdminModal();
+                renderCredits();
+                document.getElementById('admin-pass').value = '';
+            } else {
+                alert('รหัสผ่านไม่ถูกต้อง');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('admin-toggle-btn').innerText = '🔒 เข้าสู่ระบบ Admin';
+            renderCredits();
+        }
+    </script>
+</body>
+  </html>
+  
